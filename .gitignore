@@ -1,0 +1,19 @@
+# Ignore everything by default
+*
+
+# But not these files...
+!.gitignore
+!README.md
+!requirements.txt
+!aiscope_pipeline.py
+!ultralytics/
+!ultralytics/**
+ultralytics/**/__pycache__/
+!cfg/
+!cfg/coco128.yaml
+!cfg/coco.yaml
+!cfg/imagenet.yaml
+!quantization_dataset/
+!quantization_dataset/**
+!pretrained_models/
+!pretrained_models/**

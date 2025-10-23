@@ -1,0 +1,15 @@
+# For pytorch-GPU installation: use conda install pytorch==2.4.1 torchvision==0.19.1 torchaudio==2.4.1 pytorch-cuda=12.4 -c pytorch -c nvidia
+# Use `pip install rknn-toolkit2 --no-deps` to prevent pip automatically override installed torch by CPU only version
+
+colorlog==6.10.1
+fast-histogram==0.14
+matplotlib==3.10.7
+onnx<=1.18.0
+onnxruntime<=1.20.1
+opencv-contrib-python==4.12.0.88
+pandas==2.3.3
+protobuf==6.33.0
+psutil==7.1.1
+ruamel.yaml==0.18.16
+scipy==1.15.3
+tqdm==4.67.1
