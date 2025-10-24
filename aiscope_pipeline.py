@@ -338,18 +338,11 @@ parser.add_argument(
     help="Target platform",
     choices=["rk3562", "rk3566", "rk3568", "rk3576", "rk3588"],
 )
-parser.add_argument(
-    "--model-type",
-    type=str,
-    default="i8",
-    help="Model type, i8: do quantization; fp: no quantization.",
-    choices=["i8", "fp"],
-)
 
 if __name__ == "__main__":
     """
-    Usage example for basic conversion: `python aiscope_pipeline.py --model pretrained_weights/yolo11s_unpruned.pt --platform rk3588 --model-type i8`
-    Usage example for fine-tuning + conversion: `python aiscope_pipeline.py --model pretrained_weights/yolo11s_unpruned.pt --fine-tune --platform rk3588 --model-type i8`
+    Usage example for basic conversion: `python aiscope_pipeline.py --model pretrained_weights/yolo11s_unpruned.pt`
+    Usage example for fine-tuning + conversion: `python aiscope_pipeline.py --model pretrained_weights/yolo11s_unpruned.pt --fine-tune`
     Remember to prepare finetuning dataset in YOLO format before running fine-tuning.
     Modify the default configs in 'ultralytics/cfg/default.yaml' if necessary.
     """
@@ -380,17 +373,13 @@ if __name__ == "__main__":
     # To RKNN
     logger.info("=" * 20 + "Converting to RKNN" + "=" * 20)
 
-    do_quant = args.model_type == "i8"
+    # do_quant = args.model_type == "i8"
     DATASET_PATH = args.quant_dataset
-
-    logger.info(f"Quantization enabled: {do_quant}")
-
-    if do_quant:
-        logger.info(f"Quantization dataset: {DATASET_PATH}")
+    logger.info(f"Quantization dataset: {DATASET_PATH}")
     
     output_path = args.model.split(".")[0] + "_" + args.model_type + ".rknn"
     model = args.model.replace(".pt", ".onnx")
-    convert(model, args.platform, do_quant, output_path)
+    convert(model, args.platform, True, output_path)
 
     logger.info("=" * 20 + "Conversion finished successfully" + "=" * 20)
     logger.info(f"Converted model is saved to {output_path}.")

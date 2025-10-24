@@ -37,8 +37,7 @@ aiScope enables various Vision AI applications in medical contexts:
 - **Pruned Model Support**: Handles structurally pruned modules (via torch-pruning)
 - **Pretrained Models**: Pre-optimized models trained on COCO dataset for quick testing
 - **Multi-task Support**: Works with detection and classification models
-- **Quantization**: Optional INT8 quantization for improved inference speed
-- **Multiple Platforms**: Supports RK3562, RK3566, RK3568, RK3576, and RK3588
+- **INT8 Quantization**: Automatic INT8 quantization for optimal inference speed
 - **WSL2 Compatible**: Automatically detects and configures for WSL2 environments
 - **aiScope Ready**: Output models are directly compatible with MediCapture aiScope devices
 
@@ -75,9 +74,7 @@ This pipeline handles **Steps 2-5** of the complete aiScope development process.
 ```bash
 # Direct conversion (2 minutes)
 python aiscope_pipeline.py \
-    --model pretrained_models/yolo11s_unpruned.pt \
-    --platform rk3588 \
-    --model-type i8
+    --model pretrained_models/yolo11s_unpruned.pt
 ```
 
 Output: `pretrained_models/yolo11s_unpruned_i8.rknn` ready for aiScope deployment!
@@ -130,14 +127,12 @@ Convert a pretrained YOLO model directly to RKNN format:
 
 ```bash
 python aiscope_pipeline.py \
-    --model pretrained_models/yolo11s_unpruned.pt \
-    --platform rk3588 \
-    --model-type i8
+    --model pretrained_models/yolo11s_unpruned.pt
 ```
 
 **Output files:**
 - `pretrained_models/yolo11s_unpruned.onnx` - Intermediate ONNX model
-- `pretrained_models/yolo11s_unpruned_i8.rknn` - Final RKNN model for aiScope
+- `pretrained_models/yolo11s_unpruned_i8.rknn` - Final INT8 quantized RKNN model for aiScope
 
 ### Fine-tuning + Conversion
 
@@ -146,9 +141,7 @@ Fine-tune the model on your custom dataset before conversion:
 ```bash
 python aiscope_pipeline.py \
     --model pretrained_models/yolo11s_unpruned.pt \
-    --fine-tune \
-    --platform rk3588 \
-    --model-type i8
+    --fine-tune
 ```
 
 **Prerequisites for fine-tuning:**
@@ -166,27 +159,12 @@ Adjust input resolution based on your video aspect ratio:
 # For 16:9 video
 python aiscope_pipeline.py \
     --model pretrained_models/yolo11s_unpruned.pt \
-    --img-size 384 640 \
-    --platform rk3588 \
-    --model-type i8
+    --img-size 384 640
 
 # For square video (1:1 aspect ratio)
 python aiscope_pipeline.py \
     --model pretrained_models/yolov8s_unpruned.pt \
-    --img-size 640 \
-    --platform rk3588 \
-    --model-type i8
-```
-
-### FP16 Model (No Quantization)
-
-For floating-point models without INT8 quantization:
-
-```bash
-python aiscope_pipeline.py \
-    --model pretrained_models/yolov8m_unpruned.pt \
-    --platform rk3588 \
-    --model-type fp
+    --img-size 640
 ```
 
 ---
@@ -199,16 +177,6 @@ python aiscope_pipeline.py \
 | `--fine-tune` | flag | False | Enable fine-tuning before conversion |
 | `--img-size` | int/list | None | Image size for ONNX export (e.g., `640` or `384 640`) |
 | `--quant-dataset` | str | `./quantization_dataset/dataset.txt` | Path to quantization dataset list |
-| `--platform` | str | `rk3588` | Target RKNN platform |
-| `--model-type` | str | `i8` | Model type: `i8` (INT8) or `fp` (FP16) |
-
-### Supported Platforms
-
-- `rk3562` - Entry-level NPU
-- `rk3566` - Entry-level NPU
-- `rk3568` - Mid-range NPU
-- `rk3576` - High-performance NPU
-- `rk3588` - Flagship NPU (recommended for aiScope)
 
 ---
 
@@ -253,9 +221,9 @@ The conversion pipeline consists of three main stages:
 ### 3. RKNN Conversion
 - Configures normalization (mean=[0,0,0], std=[255,255,255])
 - Loads ONNX model
-- Performs optional INT8 quantization using calibration dataset
+- Performs INT8 quantization using calibration dataset
 - Builds and exports RKNN model
-- Outputs: `{model_name}_{i8|fp}.rknn`
+- Outputs: `{model_name}_i8.rknn`
 
 ---
 
@@ -308,9 +276,9 @@ batch: 16
 imgsz: 640
 ```
 
-### Quantization Dataset (for INT8 conversion)
+### Quantization Dataset (Required for Conversion)
 
-For INT8 quantization, prepare 50-200 representative images from your dateset.
+The pipeline automatically performs INT8 quantization. Prepare 50-200 representative images from your dataset.
 
 **Example `dataset.txt`:**
 ```
@@ -334,9 +302,7 @@ Use this pipeline to generate the `.rknn` file:
 python aiscope_pipeline.py \
     --model pretrained_models/yolo11s_unpruned.pt \
     --fine-tune \
-    --img-size 384 640 \
-    --platform rk3588 \
-    --model-type i8
+    --img-size 384 640
 ```
 
 ### Step 2: Package for aiScope
@@ -380,7 +346,7 @@ After running the pipeline, you'll find:
 |------|-------------|
 | `{model_name}.onnx` | Intermediate ONNX model |
 | `{model_name}_softmax_removed.onnx` | (Classification only) ONNX without Softmax layer |
-| `{model_name}_{i8\|fp}.rknn` | **Final RKNN model for aiScope deployment** |
+| `{model_name}_i8.rknn` | **Final INT8 quantized RKNN model for aiScope deployment** |
 | `model_conversion.log` | Detailed conversion logs with timestamps |
 | `runs/detect/pipeline_test*/` | (Fine-tuning) Training results, plots, weights |
 
@@ -441,7 +407,7 @@ dfl: 1.5                 # Distribution focal loss gain
 
 ### RKNN Quantization
 
-The pipeline uses these default quantization settings (hardcoded in `aiscope_pipeline.py:275-277`):
+The pipeline automatically performs INT8 quantization with these settings (hardcoded in `aiscope_pipeline.py:275-277`):
 
 ```python
 mean_values=[[0, 0, 0]]       # No mean normalization
